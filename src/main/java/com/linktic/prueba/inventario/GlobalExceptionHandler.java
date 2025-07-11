@@ -18,6 +18,7 @@ import com.linktic.prueba.inventario.dto.ErrorResponse;
 import com.linktic.prueba.inventario.exception.ConflictException;
 import com.linktic.prueba.inventario.exception.ResourceNotFoundException;
 
+import feign.FeignException;
 import jakarta.validation.ConstraintViolationException;
 
 @RestControllerAdvice
@@ -63,6 +64,30 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.unprocessableEntity().body(Map.of("errors", errors));
     }
+	
+	@ExceptionHandler(FeignException.class)
+	public ResponseEntity<?> handleFeignErrors(FeignException ex) {
+		String responseBody = ex.contentUTF8();
+
+		// Si ya contiene "errors", reenviamos el JSON tal como lo recibimos
+	    if (responseBody != null && responseBody.trim().startsWith("{") && responseBody.contains("\"errors\"")) {
+	        return ResponseEntity
+	                .status(ex.status())
+	                .header("Content-Type", "application/json")
+	                .body(responseBody);
+	    }
+
+	    // Si no viene con estructura JSON API, formateamos el error
+	    ErrorResponse error = new ErrorResponse(
+	            String.valueOf(ex.status()),
+	            "Upstream Error",
+	            responseBody != null ? responseBody : ex.getMessage()
+	    );
+
+	    return ResponseEntity
+	            .status(ex.status())
+	            .body(Map.of("errors", List.of(error)));
+	}
 
 	// 500
     @ExceptionHandler(Exception.class)
