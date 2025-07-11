@@ -2,10 +2,10 @@ package com.linktic.prueba.inventario;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
-@ComponentScan(basePackages = "com.linktic.prueba.inventario")
+@EnableFeignClients
 public class InventarioServiceApplication {
 
 	public static void main(String[] args) {

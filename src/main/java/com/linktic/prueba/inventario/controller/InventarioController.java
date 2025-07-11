@@ -17,56 +17,45 @@ import org.springframework.web.bind.annotation.RestController;
 import com.linktic.prueba.inventario.dto.CompraRequest;
 import com.linktic.prueba.inventario.dto.CompraResponse;
 import com.linktic.prueba.inventario.dto.JsonApiResponse;
-import com.linktic.prueba.inventario.dto.ProductoResponse;
 import com.linktic.prueba.inventario.service.CompraService;
-import com.linktic.prueba.inventario.service.ProductoService;
 
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/inventario")
 public class InventarioController {
-	
+
 	@Autowired
-	private ProductoService productoService;
-	
-	@Autowired
-	private CompraService compraService;
-	
-	@GetMapping("/buscar")
-	public JsonApiResponse<ProductoResponse> buscar(@RequestParam String codigoBarras, @RequestParam String nombre, @RequestParam(defaultValue = "1") int cantidad) {
-	    ProductoResponse response = productoService.consultar(codigoBarras, nombre);
-        return new JsonApiResponse<>(List.of(response), null, null);
-	}
-	
+	private CompraService service;
+
 	@GetMapping("/{id}")
     public JsonApiResponse<CompraResponse> buscarCompra(@PathVariable UUID id) {
-        return new JsonApiResponse<>(List.of(compraService.buscar(id)), null, null);
+        return new JsonApiResponse<>(List.of(service.buscar(id)), null, null);
     }
 	
 	@PostMapping
     public JsonApiResponse<CompraResponse> crearCompra() {
-        return new JsonApiResponse<>(List.of(compraService.crear()), null, null);
+        return new JsonApiResponse<>(List.of(service.crear()), null, null);
     }
 
     @PatchMapping("/{id}/agregar-producto")
     public JsonApiResponse<CompraResponse> agregarProducto(@PathVariable UUID id, @RequestBody CompraRequest request) {
-        return new JsonApiResponse<>(List.of(compraService.agregarProducto(id, request)), null, null);
+        return new JsonApiResponse<>(List.of(service.agregarProducto(id, request)), null, null);
     }
 
     @PatchMapping("/{id}/cancelar")
     public JsonApiResponse<CompraResponse> cancelar(@PathVariable UUID id) {
-        return new JsonApiResponse<>(List.of(compraService.cancelar(id)), null, null);
+        return new JsonApiResponse<>(List.of(service.cancelar(id)), null, null);
     }
 
     @PatchMapping("/{id}/finalizar")
     public JsonApiResponse<CompraResponse> finalizar(@PathVariable UUID id) {
-        return new JsonApiResponse<>(List.of(compraService.finalizar(id)), null, null);
+        return new JsonApiResponse<>(List.of(service.finalizar(id)), null, null);
     }
     
     @GetMapping
     public JsonApiResponse<CompraResponse> listar(@RequestParam(required = false) String nombre, @RequestParam(required = false) String codigoBarras, Pageable pageable, HttpServletRequest request) {
-        var page = compraService.listar(nombre, codigoBarras, pageable);
+        var page = service.listar(nombre, codigoBarras, pageable);
         
         String params = "";
 	    if (nombre != null) params += "&nombre=" + nombre;

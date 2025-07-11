@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.linktic.prueba.inventario.client.ProductoFeign;
 import com.linktic.prueba.inventario.dto.CompraRequest;
 import com.linktic.prueba.inventario.dto.CompraResponse;
 import com.linktic.prueba.inventario.mapper.CompraMapper;
@@ -18,7 +19,6 @@ import com.linktic.prueba.inventario.model.EstadoCompra;
 import com.linktic.prueba.inventario.model.Producto;
 import com.linktic.prueba.inventario.repository.CompraRepository;
 import com.linktic.prueba.inventario.service.CompraService;
-import com.linktic.prueba.inventario.service.ProductoService;
 
 import jakarta.transaction.Transactional;
 
@@ -30,7 +30,7 @@ public class CompraServiceImpl implements CompraService{
 	private CompraRepository repository;
 	
 	@Autowired
-	private ProductoService productoService;
+	private ProductoFeign productoClient;
 	
 	@Autowired
 	private ModelMapper mapper;
@@ -50,11 +50,8 @@ public class CompraServiceImpl implements CompraService{
     public CompraResponse agregarProducto(UUID compraId, CompraRequest request) {
 		Compra compra = validarCompra(compraId, "agregar productos a una compra pendiente");
 
-        Producto producto = productoService.consultarInterno(request.getCodigoBarras(), request.getCantidad());
-        
-        System.out.println(producto.toString());
-        
-        productoService.SeparaInventario(producto, false, request.getCantidad());
+        Producto producto = productoClient.verificar(request.getCodigoBarras(), request.getCantidad());        
+        productoClient.separaInventario(producto.getId(), false, request.getCantidad());
         
         boolean existe = false;
         for(CompraXProducto compraProducto : compra.getProductos()) {
@@ -95,7 +92,7 @@ public class CompraServiceImpl implements CompraService{
 		 compra.setFinalizacion(LocalDateTime.now());
 		 
 		 for (CompraXProducto cxp : compra.getProductos()) {
-			 productoService.SeparaInventario(cxp.getProducto(), true, cxp.getCantidad());
+			 productoClient.separaInventario(cxp.getProducto().getId(), true, cxp.getCantidad());
 		 }
 		 return compraMapper.toDto(repository.save(compra));
 	 }
@@ -108,7 +105,7 @@ public class CompraServiceImpl implements CompraService{
 		 compra.setFinalizacion(LocalDateTime.now());
 		 
 		 for (CompraXProducto cxp : compra.getProductos()) {
-			 productoService.ModificarInventario(cxp.getProducto(), cxp.getCantidad());
+			 productoClient.modificaInventario(cxp.getProducto().getId(), cxp.getCantidad());
 		 }
 		 return compraMapper.toDto(repository.save(compra));
 	 }
