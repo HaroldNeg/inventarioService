@@ -15,7 +15,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.linktic.prueba.inventario.dto.ErrorResponse;
+import com.linktic.prueba.inventario.dto.JsonApiResponse;
 import com.linktic.prueba.inventario.exception.ConflictException;
+import com.linktic.prueba.inventario.exception.ConflictoInventarioException;
+import com.linktic.prueba.inventario.exception.RecursoNoEncontradoException;
 import com.linktic.prueba.inventario.exception.ResourceNotFoundException;
 
 import feign.FeignException;
@@ -102,6 +105,18 @@ public class GlobalExceptionHandler {
             return ResponseEntity.notFound().build();
         }
         throw ex;
+    }
+    
+    @ExceptionHandler(RecursoNoEncontradoException.class)
+    public ResponseEntity<JsonApiResponse<Void>> handleNotFound(RecursoNoEncontradoException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new JsonApiResponse<>(null, null, null));
+    }
+
+    @ExceptionHandler(ConflictoInventarioException.class)
+    public ResponseEntity<JsonApiResponse<Void>> handleConflict(ConflictoInventarioException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new JsonApiResponse<>(null, null, null));
     }
     
     private ResponseEntity<Map<String, List<ErrorResponse>>> buildError(String status, String title, String detail, HttpStatus httpStatus) {
