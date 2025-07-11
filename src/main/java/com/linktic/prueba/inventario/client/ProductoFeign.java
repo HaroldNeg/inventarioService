@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.linktic.prueba.inventario.dto.ProductoResponse;
 import com.linktic.prueba.inventario.model.Producto;
 
-@FeignClient(name="productoService", path = "/api/productos", configuration = com.linktic.prueba.inventario.config.FeignConfig.class)
+@FeignClient(name="producto-service", path = "/api/productos", configuration = com.linktic.prueba.inventario.config.FeignConfig.class)
 public interface ProductoFeign {
 	
 	@GetMapping("/buscar")
